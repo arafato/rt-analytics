@@ -3,5 +3,5 @@ module.exports = {
     consumerSecret:      'XXX',
     accessToken:         'XXX',
     accessTokenSecret:  'XXX',
-    streamName: 'XXX'
+    streamName: 'social-rt-demo'
 };
