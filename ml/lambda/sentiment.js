@@ -1,35 +1,34 @@
-var elasticsearch = require('elasticsearch');
-var moment = require('moment');
+var AWS = require('aws-sdk');
 var async = require('async');
 
-var client = new elasticsearch.Client({
-  host: 'search-test-uic55ujquckt6ra6ooebk3x4lq.us-east-1.es.amazonaws.com:80',
-  log: 'error'
-});
+var ml = new AWS.MachineLearning({ region: 'eu-west-1'  });
+var mlModelId = 'ml-BJ36JTjPiMt';
+var predictEndpoint = 'https://realtime.machinelearning.eu-west-1.amazonaws.com';
 
 exports.handler = function(event, context) {
     console.log("Starting batch processing of " + event.Records.length);
+
     var funcs = [];                                                    
     
     event.Records.forEach(function(record) {
-
+	
 	funcs.push(function(cb) {
 	    processTweet(record, cb);
 	});
 
+	async.parallel(funcs, function(err, results) {
+	    if (err) {
+		console.log("Error: " + err);
+		context.fail();
+	    }
+
+	    console.log("Successfully processed " + event.Records.length + " records.");
+	    context.succeed();
+	});
+	
     }); // foreach
-
-
-    async.parallel(funcs, function(err, results) {
-	if (err) {
-	    console.log("Error: " + err);
-	    context.fail();
-	}
-
-	console.log("Successfully processed " + event.Records.length + " records.");
-	context.succeed();	
-    });
 };
+
 
 function processTweet(record, cb) {
 
@@ -50,32 +49,30 @@ function processTweet(record, cb) {
     
     try {
     	var tweet = JSON.parse(payload);
+	
     } catch(e) {
     	console.log("Error in JSON: " + e);
+	console.log(payload);
     }
     
     if (tweet) {
-
-	client.index({
-    	    index: 'social_rt_demo',
-    	    type: 'tweet',
-    	    // id: tweet.id,
-    	    body: {
-    		text: tweet.text,
-    		username: tweet.username,
-		location: { lat: tweet.coordinateX, lon: tweet.coordinateY },
-    		// coordinateX: tweet.coordinateX,
-    		// coordinateY: tweet.coordinateY,
-    		createdAt: tweet.createdAt
-    	    }
-    	}, function (error, response) {
-    	    if (error) {
-		console.log(response);
-		cb(error);
+	var params = {
+	    MLModelId: mlModelId,
+	    PredictEndpoint: predictEndpoint,
+	    Record: {
+		Sentence: tweet.text
+	    }
+	};
+	ml.predict(params, function(err, data) {
+	    if (err) {
+		console.log(err);
+		cb(err);
 	    } else {
+		console.log(data);
+		console.log(tweet.text);
 		cb();
 	    }
-    	});
+	});
     }
     else {
 	cb();

@@ -12,7 +12,7 @@ var T = new Twit({
     access_token_secret:  config.accessTokenSecret
 });
 
-var stream = T.stream('statuses/filter', { locations: ['-180', '-90', '180', '90'] });
+var stream = T.stream('statuses/filter', { locations: ['-180', '-90', '180', '90'], language: 'en' });
 
 var tweetBuffer = [];
 
