@@ -6,8 +6,10 @@ var client = new elasticsearch.Client({
   log: 'trace'
 });
 
+var params = process.argv.slice(2);
+var indexName = params[0];
 
-client.indices.delete({index:'*'});
+client.indices.delete({index:indexName});
 
 // client.create({
 //   index: 'social',

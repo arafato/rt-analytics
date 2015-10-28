@@ -1,0 +1,18 @@
+curl -XPOST search-test-uic55ujquckt6ra6ooebk3x4lq.us-east-1.es.amazonaws.com:80/social_rt_demo_sentiment -d '
+{
+    "mappings": {
+	"tweet": {
+	    "properties": {
+		"location": {
+		    "type": "geo_point",
+		    "lat_lon": true
+		},
+		"username": {"type": "string"},
+		"text": {"type": "string"},
+		"createdAt": {"type": "date"},
+"sentiment": {"type": "boolean"}
+	    }
+	}
+    }  
+}
+'
