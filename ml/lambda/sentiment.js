@@ -1,6 +1,11 @@
+var elasticsearch = require('elasticsearch');
 var AWS = require('aws-sdk');
 var async = require('async');
 
+var esClient = new elasticsearch.Client({
+  host: 'search-test-uic55ujquckt6ra6ooebk3x4lq.us-east-1.es.amazonaws.com:80',
+  log: 'error'
+});
 var ml = new AWS.MachineLearning({ region: 'eu-west-1'  });
 var mlModelId = 'ml-BJ36JTjPiMt';
 var predictEndpoint = 'https://realtime.machinelearning.eu-west-1.amazonaws.com';
@@ -68,13 +73,28 @@ function processTweet(record, cb) {
 		console.log(err);
 		cb(err);
 	    } else {
-		console.log(data);
-		console.log(tweet.text);
-		cb();
+		esClient.index({
+    		    index: 'social_rt_demo_sentiment',
+    		    type: 'tweet',
+    	            body: {
+    			text: tweet.text,
+    			username: tweet.username,
+			location: { lat: tweet.coordinateX, lon: tweet.coordinateY },
+    			createdAt: tweet.createdAt,
+			sentiment: (data.Prediction.predictedLabel === '1') ? true : false
+    		    }
+    		}, function (error, response) {
+    		    if (error) {
+			console.log(response);
+			cb(error);
+		    } else {
+			cb();
+		    }
+    		});
 	    }
 	});
     }
-    else {
+    else { // if (tweet)
 	cb();
     }
 }
