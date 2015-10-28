@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Realtime Tweet Map</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/start-template.css" rel="stylesheet">
+      </head>
+
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Twitter Map</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+	    <!-- <li><a href="#">Number of Tweets: <span data-bind="text: numPlayers"></span></a></li> -->
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+    
+    <div class="container">
+      
+      <iframe id="iframe" src="https://search-test-uic55ujquckt6ra6ooebk3x4lq.us-east-1.es.amazonaws.com/_plugin/kibana/#/visualize/create?embed&type=tile_map&indexPattern=social_rt_demo&_g=(refreshInterval:(display:Off,section:0,value:0),time:(from:now%2Fy,mode:quick,to:now%2Fy))&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),vis:(aggs:!((id:'1',params:(),schema:metric,type:count),(id:'2',params:(field:location,precision:3),schema:segment,type:geohash_grid)),listeners:(),params:(isDesaturated:!t,mapType:'Scaled%20Circle%20Markers'),type:tile_map))" height="600" width="800"></iframe>
+
+      <br>
+
+    <div class="container">
+      <form class="form-inline">
+      
+    <div class="form-group">
+      <label for="inputSearch" class="sr-only">keyword</label>
+      <input data-bind="value: keyword" type="text" class="form-control" id="inputSearch" placeholder="keyword">
+    </div>
+    <button data-bind="click: searchKeyword" class="btn btn-primary">Search</button>
+    <h4>Found <span data-bind="text: numOfHits"></span> results!</h4>
+    </form>
+    
+    <table class="table table-bordered">
+      <thead>
+	<tr>
+	  <th>#</th>
+	  <th>Username</th>
+	  <th>Tweet</th>
+	</tr>
+	</thead>
+      <tbody data-bind="foreach: searchResults">
+	<tr>
+	  <th scope="row"><span data-bind="text: $index()+1"></span></th>
+	  <td data-bind="text: username"></td>
+	  <td data-bind="text: msg"></td>
+	</tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <script src="js/jquery-2.1.4.min.js"></script>
+  <script src="js/knockout-3.3.0.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/aws-sdk.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/vm.js"></script>
+  <script src="js/index.js"></script>
+  </body>
+</html>
+  
+
+
