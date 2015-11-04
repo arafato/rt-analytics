@@ -8,76 +8,76 @@ var client = new elasticsearch.Client({
 });
 
 exports.handler = function(event, context) {
-    console.log("Starting batch processing of " + event.Records.length);
-    var funcs = [];                                                    
-    
-    event.Records.forEach(function(record) {
+  console.log("Starting batch processing of " + event.Records.length);
+  var funcs = [];
 
-	funcs.push(function(cb) {
-	    processTweet(record, cb);
-	});
+  event.Records.forEach(function(record) {
 
-    }); // foreach
-
-
-    async.parallel(funcs, function(err, results) {
-	if (err) {
-	    console.log("Error: " + err);
-	    context.fail();
-	}
-
-	console.log("Successfully processed " + event.Records.length + " records.");
-	context.succeed();	
+    funcs.push(function(cb) {
+      processTweet(record, cb);
     });
+
+  }); // foreach
+
+
+  async.parallel(funcs, function(err, results) {
+    if (err) {
+      console.log("Error: " + err);
+      context.fail();
+    }
+
+    console.log("Successfully processed " + event.Records.length + " records.");
+    context.succeed();
+  });
 };
 
 function processTweet(record, cb) {
 
-    // Kinesis data is base64 encoded so decode here
-    var payload = new Buffer(record.kinesis.data, 'base64').toString('utf8');
-    // console.log("Payload: " + payload);
-    
-    payload = payload.replace(/\\n/g, "\\n")  
-        .replace(/\\'/g, "\\'")
-        .replace(/\\"/g, '\\"')
-        .replace(/\\&/g, "\\&")
-        .replace(/\\r/g, "\\r")
-        .replace(/\\t/g, "\\t")
-        .replace(/\\b/g, "\\b")
-        .replace(/\\f/g, "\\f");
-    // remove non-printable and other non-valid JSON chars
-    payload = payload.replace(/[\u0000-\u0019]+/g,""); 
-    
-    try {
-    	var tweet = JSON.parse(payload);
-    } catch(e) {
-    	console.log("Error in JSON: " + e);
-    }
-    
-    if (tweet) {
+  // Kinesis data is base64 encoded so decode here
+  var payload = new Buffer(record.kinesis.data, 'base64').toString('utf8');
+  // console.log("Payload: " + payload);
 
-	client.index({
-    	    index: 'social_rt_demo',
-    	    type: 'tweet',
-    	    // id: tweet.id,
-    	    body: {
-    		text: tweet.text,
-    		username: tweet.username,
-		location: { lat: tweet.coordinateX, lon: tweet.coordinateY },
-    		// coordinateX: tweet.coordinateX,
-    		// coordinateY: tweet.coordinateY,
-    		createdAt: tweet.createdAt
-    	    }
-    	}, function (error, response) {
-    	    if (error) {
-		console.log(response);
-		cb(error);
-	    } else {
-		cb();
-	    }
-    	});
-    }
-    else {
-	cb();
-    }
+  payload = payload.replace(/\\n/g, "\\n")
+  .replace(/\\'/g, "\\'")
+  .replace(/\\"/g, '\\"')
+  .replace(/\\&/g, "\\&")
+  .replace(/\\r/g, "\\r")
+  .replace(/\\t/g, "\\t")
+  .replace(/\\b/g, "\\b")
+  .replace(/\\f/g, "\\f");
+  // remove non-printable and other non-valid JSON chars
+  payload = payload.replace(/[\u0000-\u0019]+/g,"");
+
+  try {
+    var tweet = JSON.parse(payload);
+  } catch(e) {
+    console.log("Error in JSON: " + e);
+  }
+
+  if (tweet) {
+
+    client.index({
+      index: 'social_rt_demo',
+      type: 'tweet',
+      // id: tweet.id,
+      body: {
+        text: tweet.text,
+        username: tweet.username,
+        location: { lat: tweet.coordinateX, lon: tweet.coordinateY },
+        // coordinateX: tweet.coordinateX,
+        // coordinateY: tweet.coordinateY,
+        createdAt: tweet.createdAt
+      }
+    }, function (error, response) {
+      if (error) {
+        console.log(response);
+        cb(error);
+      } else {
+        cb();
+      }
+    });
+  }
+  else {
+    cb();
+  }
 }
